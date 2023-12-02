@@ -57,25 +57,6 @@ public class AccountController : Controller
             return StatusCode((int)HttpStatusCode.InternalServerError);
         }
 
-        var responseString = await apiResponse.Content.ReadAsStringAsync();
-        var appResponse = JsonSerializer.Deserialize<AppResponse>(responseString, new JsonSerializerOptions(JsonSerializerDefaults.Web));
-
-        if (appResponse?.Data is null)
-        {
-            return StatusCode((int)HttpStatusCode.InternalServerError);
-        }
-
-        var accessTokenResponse = JsonSerializer.Deserialize<AccessTokenResponse?>(appResponse.Data.ToString(), new JsonSerializerOptions(JsonSerializerDefaults.Web));
-
-        var token = GetTokenFromString(accessTokenResponse?.AccessToken);
-
-        if (token is null)
-        {
-            return StatusCode((int)HttpStatusCode.InternalServerError);
-        }
-
-        await AuthenticateUserByTokenAsync(token);
-
         return Ok();
     }
 
@@ -92,7 +73,7 @@ public class AccountController : Controller
     {
         var client = _httpFactory.CreateClient();
         var content = new StringContent(JsonSerializer.Serialize(model), Encoding.UTF8, "application/json");
-        var uri = $"{EnvironmentVariables.ApiAuthBaseUrl}/api/auth/user/login";
+        var uri = $"{EnvironmentVariables.ApiAuthBaseUrl}/api/auth/account/login";
 
         var apiResponse = await client.PostAsync(uri, content);
 
