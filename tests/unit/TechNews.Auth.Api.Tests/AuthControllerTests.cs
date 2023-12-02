@@ -29,7 +29,7 @@ public class AuthControllerTests : IClassFixture<TestsFixture>
         var userManagerFake = A.Fake<UserManager<User>>();
         var signInManagerFake = A.Fake<SignInManager<User>>();
         var cryptographicKeyRetrieverFake = A.Fake<ICryptographicKeyRetriever>();
-        var controller = new AuthController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake);
+        var controller = new UserController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake);
         var requestFake = _testsFixture.GetValidRegisterUserRequestModel();
 
         A.CallTo(() => userManagerFake.FindByIdAsync(A<string>._))
@@ -57,7 +57,7 @@ public class AuthControllerTests : IClassFixture<TestsFixture>
         var userManagerFake = A.Fake<UserManager<User>>();
         var signInManagerFake = A.Fake<SignInManager<User>>();
         var cryptographicKeyRetrieverFake = A.Fake<ICryptographicKeyRetriever>();
-        var controller = new AuthController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake);
+        var controller = new UserController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake);
 
         var requestFake = _testsFixture.GetValidRegisterUserRequestModel();
 
@@ -94,7 +94,7 @@ public class AuthControllerTests : IClassFixture<TestsFixture>
         var userManagerFake = A.Fake<UserManager<User>>();
         var signInManagerFake = A.Fake<SignInManager<User>>();
         var cryptographicKeyRetrieverFake = A.Fake<ICryptographicKeyRetriever>();
-        var controller = new AuthController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake);
+        var controller = new UserController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake);
 
         var requestFake = _testsFixture.GetValidRegisterUserRequestModel();
 
@@ -171,7 +171,7 @@ public class AuthControllerTests : IClassFixture<TestsFixture>
         A.CallTo(() => userManagerFake.GetRolesAsync(createdUserFake))
            .Returns(Task.FromResult(_testsFixture.GetFakeRoles()));
 
-        var controller = new AuthController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake)
+        var controller = new UserController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake)
         {
             ControllerContext = new ControllerContext()
             {
@@ -252,7 +252,7 @@ public class AuthControllerTests : IClassFixture<TestsFixture>
         A.CallTo(() => httpContextFake.Request.Scheme).Returns("https");
         A.CallTo(() => httpContextFake.Request.Host).Returns(new HostString("localhost:5000"));
 
-        var controller = new AuthController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake)
+        var controller = new UserController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake)
         {
             ControllerContext = new ControllerContext()
             {
@@ -300,7 +300,7 @@ public class AuthControllerTests : IClassFixture<TestsFixture>
         var userManagerFake = A.Fake<UserManager<User>>();
         var signInManagerFake = A.Fake<SignInManager<User>>();
         var cryptographicKeyRetrieverFake = A.Fake<ICryptographicKeyRetriever>();
-        var controller = new AuthController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake);
+        var controller = new UserController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake);
 
         var requestFake = _testsFixture.GetValidRegisterUserRequestModel();
 
@@ -376,7 +376,7 @@ public class AuthControllerTests : IClassFixture<TestsFixture>
         A.CallTo(() => httpContextFake.Request.Scheme).Returns("https");
         A.CallTo(() => httpContextFake.Request.Host).Returns(new HostString("localhost:5000"));
 
-        var controller = new AuthController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake)
+        var controller = new UserController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake)
         {
             ControllerContext = new ControllerContext()
             {
@@ -411,7 +411,7 @@ public class AuthControllerTests : IClassFixture<TestsFixture>
         var userManagerFake = A.Fake<UserManager<User>>();
         var signInManagerFake = A.Fake<SignInManager<User>>();
         var cryptographicKeyRetrieverFake = A.Fake<ICryptographicKeyRetriever>();
-        var controller = new AuthController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake);
+        var controller = new AccountController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake);
 
         var requestFake = _testsFixture.GetValidLoginRequestModel();
 
@@ -440,7 +440,7 @@ public class AuthControllerTests : IClassFixture<TestsFixture>
         var userManagerFake = A.Fake<UserManager<User>>();
         var signInManagerFake = A.Fake<SignInManager<User>>();
         var cryptographicKeyRetrieverFake = A.Fake<ICryptographicKeyRetriever>();
-        var controller = new AuthController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake);
+        var controller = new AccountController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake);
 
         var requestFake = _testsFixture.GetValidLoginRequestModel();
 
@@ -469,7 +469,7 @@ public class AuthControllerTests : IClassFixture<TestsFixture>
         var userManagerFake = A.Fake<UserManager<User>>();
         var signInManagerFake = A.Fake<SignInManager<User>>();
         var cryptographicKeyRetrieverFake = A.Fake<ICryptographicKeyRetriever>();
-        var controller = new AuthController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake);
+        var controller = new AccountController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake);
 
         var requestFake = _testsFixture.GetValidLoginRequestModel();
 
@@ -502,7 +502,7 @@ public class AuthControllerTests : IClassFixture<TestsFixture>
         var userManagerFake = A.Fake<UserManager<User>>();
         var signInManagerFake = A.Fake<SignInManager<User>>();
         var cryptographicKeyRetrieverFake = A.Fake<ICryptographicKeyRetriever>();
-        var controller = new AuthController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake);
+        var controller = new AccountController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake);
 
         var requestFake = _testsFixture.GetValidLoginRequestModel();
 
@@ -535,7 +535,7 @@ public class AuthControllerTests : IClassFixture<TestsFixture>
         var userManagerFake = A.Fake<UserManager<User>>();
         var signInManagerFake = A.Fake<SignInManager<User>>();
         var cryptographicKeyRetrieverFake = A.Fake<ICryptographicKeyRetriever>();
-        var controller = new AuthController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake);
+        var controller = new AccountController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake);
 
         var requestFake = _testsFixture.GetValidLoginRequestModel();
 
@@ -590,7 +590,7 @@ public class AuthControllerTests : IClassFixture<TestsFixture>
         A.CallTo(() => httpContextFake.Request.Scheme).Returns("https");
         A.CallTo(() => httpContextFake.Request.Host).Returns(new HostString("localhost:5000"));
 
-        var controller = new AuthController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake)
+        var controller = new AccountController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake)
         {
             ControllerContext = new ControllerContext()
             {
@@ -624,7 +624,7 @@ public class AuthControllerTests : IClassFixture<TestsFixture>
         var userManagerFake = A.Fake<UserManager<User>>();
         var signInManagerFake = A.Fake<SignInManager<User>>();
         var cryptographicKeyRetrieverFake = A.Fake<ICryptographicKeyRetriever>();
-        var controller = new AuthController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake);
+        var controller = new UserController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake);
 
         // Act
         var response = await controller.GetUser(Guid.Empty);
@@ -647,7 +647,7 @@ public class AuthControllerTests : IClassFixture<TestsFixture>
         var userManagerFake = A.Fake<UserManager<User>>();
         var signInManagerFake = A.Fake<SignInManager<User>>();
         var cryptographicKeyRetrieverFake = A.Fake<ICryptographicKeyRetriever>();
-        var controller = new AuthController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake);
+        var controller = new UserController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake);
 
         A.CallTo(() => userManagerFake.FindByIdAsync(A<string>._))
         .Returns(Task.FromResult<User?>(null));
@@ -673,7 +673,7 @@ public class AuthControllerTests : IClassFixture<TestsFixture>
         var userManagerFake = A.Fake<UserManager<User>>();
         var signInManagerFake = A.Fake<SignInManager<User>>();
         var cryptographicKeyRetrieverFake = A.Fake<ICryptographicKeyRetriever>();
-        var controller = new AuthController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake);
+        var controller = new UserController(userManagerFake, signInManagerFake, cryptographicKeyRetrieverFake);
         var fakeUser = _testsFixture.GetFakeUser();
 
         A.CallTo(() => userManagerFake.FindByIdAsync(A<string>._))
