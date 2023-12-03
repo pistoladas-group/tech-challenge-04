@@ -84,7 +84,7 @@ public class AccountController : ControllerBase
     {
         var registeredUserResult = await _userManager.FindByEmailAsync(user.Email);
 
-        if (registeredUserResult is null || registeredUserResult?.UserName is null)
+        if (registeredUserResult?.UserName is null)
         {
             return BadRequest(new ApiResponse(error: new ErrorResponse("invalid_request", "InvalidRequest", "User or password are invalid")));
         }

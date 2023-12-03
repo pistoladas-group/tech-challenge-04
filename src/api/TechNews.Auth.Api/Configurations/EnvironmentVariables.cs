@@ -14,6 +14,11 @@ public static class EnvironmentVariables
     public static int KeyExpirationInDays { get; private set; } = 30;
     public static string? CryptographicAlgorithm { get; private set; }
     public static string AzureKeyVaultUrl { get; private set; } = string.Empty;
+    public static string BrokerQueueName { get; private set; } = string.Empty;
+    public static string BrokerServer { get; private set; } = string.Empty;
+    public static string BrokerVirtualHost { get; private set; } = string.Empty;
+    public static string BrokerUserName { get; private set; } = string.Empty;
+    public static string BrokerPassword { get; private set; } = string.Empty;
 
     public static IServiceCollection AddEnvironmentVariables(this IServiceCollection services, IWebHostEnvironment environment)
     {
@@ -50,6 +55,11 @@ public static class EnvironmentVariables
         DiscordWebhookToken = Environment.GetEnvironmentVariable("TECHNEWS_AUTH_API_DISCORD_WEBHOOK_TOKEN");
         CryptographicAlgorithm = Environment.GetEnvironmentVariable("CRYPTOGRAPHIC_ALGORITHM");
         AzureKeyVaultUrl = Environment.GetEnvironmentVariable("AZURE_KEY_VAULT_URL") ?? string.Empty;
+        BrokerQueueName = Environment.GetEnvironmentVariable("TECHNEWS_AUTH_API_BROKER_QUEUE_NAME") ?? string.Empty;
+        BrokerServer = Environment.GetEnvironmentVariable("TECHNEWS_AUTH_API_BROKER_SERVER") ?? string.Empty;
+        BrokerVirtualHost = Environment.GetEnvironmentVariable("TECHNEWS_AUTH_API_BROKER_VIRTUAL_HOST") ?? string.Empty;
+        BrokerUserName = Environment.GetEnvironmentVariable("TECHNEWS_AUTH_API_BROKER_USER_NAME") ?? string.Empty;
+        BrokerPassword = Environment.GetEnvironmentVariable("TECHNEWS_AUTH_API_BROKER_PASSWORD") ?? string.Empty;
 
         int.TryParse(Environment.GetEnvironmentVariable("TOKEN_EXPIRATION_IN_MINUTES"), out var parsedExpiration);
 

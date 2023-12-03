@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>dotnet-TechNews.Services.Notification-22037e20-aefa-408d-9e44-1ab172aa584f</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="dotenv.net" Version="3.1.2"/>
+        <PackageReference Include="MassTransit.RabbitMQ" Version="8.1.2" />
+<!--        <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0"/>-->
+        <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
+        <PackageReference Include="Serilog.Sinks.Discord" Version="1.2.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\shared\TechNews.Common.Library\TechNews.Common.Library.csproj" />
+    </ItemGroup>
+</Project>

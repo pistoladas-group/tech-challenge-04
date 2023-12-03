@@ -1,6 +1,8 @@
 using System.Net;
+using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using TechNews.Auth.Api.Configurations;
 using TechNews.Auth.Api.Data;
 using TechNews.Auth.Api.Models;
 using TechNews.Common.Library.Models;
@@ -11,12 +13,14 @@ namespace TechNews.Auth.Api.Controllers;
 [Route("api/auth/user")]
 public class UserController : ControllerBase
 {
+    private IBus _bus;
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
     private readonly ICryptographicKeyRetriever _cryptographicKeyRetriever;
 
-    public UserController(UserManager<User> userManager, SignInManager<User> signInManager, ICryptographicKeyRetriever cryptographicKeyRetriever)
+    public UserController(UserManager<User> userManager, SignInManager<User> signInManager, ICryptographicKeyRetriever cryptographicKeyRetriever, IBus bus)
     {
+        _bus = bus;
         _userManager = userManager;
         _signInManager = signInManager;
         _cryptographicKeyRetriever = cryptographicKeyRetriever;
@@ -55,14 +59,16 @@ public class UserController : ControllerBase
 
         var registeredUserResult = await _userManager.FindByEmailAsync(user.Email);
 
-        if (registeredUserResult is null)
+        if (registeredUserResult?.Email is null)
         {
             return StatusCode((int)HttpStatusCode.InternalServerError, new ApiResponse(error: new ErrorResponse("server_error", "InternalError", "There was an unexpected error with the application. Please contact support!")));
         }
 
-        // TODO: Mandar email assíncrono
-
         var emailToken = await _userManager.GenerateEmailConfirmationTokenAsync(registeredUserResult);
+        var endpoint = await _bus.GetSendEndpoint(new Uri($"queue:{EnvironmentVariables.BrokerQueueName}"));
+        var brokerMessage = new ConfirmEmailBrokerMessage(email: registeredUserResult.Email, token: emailToken);
+        
+        await endpoint.Send(brokerMessage);
 
         return CreatedAtAction(nameof(GetUser), new { userId = id }, new ApiResponse());
     }

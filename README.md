@@ -18,6 +18,10 @@
   </a>
 </p>
 
+# TODO
+- Correlation ID
+- .NET8
+- Event Sourcing
 
 ## Sumário
 

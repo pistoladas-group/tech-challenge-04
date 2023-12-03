@@ -17,6 +17,7 @@ builder.Services
     {
         options.ConnectionString = "InstrumentationKey=ae5e2077-ae37-42fb-860c-b409d1aa2280;IngestionEndpoint=https://eastus-8.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/";
     })
+    .ConfigureMessageBroker()
     .AddHealthChecks();
 
 var app = builder.Build();
