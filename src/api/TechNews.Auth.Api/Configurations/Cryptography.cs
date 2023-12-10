@@ -1,14 +1,12 @@
-using TechNews.Auth.Api.Services;
-using TechNews.Auth.Api.Services.Cryptography;
+﻿using TechNews.Auth.Api.Services.Cryptography;
 using TechNews.Auth.Api.Services.KeyRetrievers;
 
 namespace TechNews.Auth.Api.Configurations;
 
-public static class DependencyInjections
+public static class Cryptography
 {
-    public static IServiceCollection ConfigureDependencyInjections(this IServiceCollection services)
+    public static IServiceCollection ConfigureCryptographicKeys(this IServiceCollection services)
     {
-        // Scopeds
         switch (EnvironmentVariables.CryptographicAlgorithm)
         {
             case "ECC":
@@ -22,11 +20,7 @@ public static class DependencyInjections
                 break;
         }
 
-        // Singletons
         services.AddSingleton<ICryptographicKeyRetriever, CryptographicKeyInMemoryRetriever>();
-
-        // Background Services
-        services.AddHostedService<KeyRotatorBackgroundService>();
 
         return services;
     }
