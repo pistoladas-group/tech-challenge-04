@@ -14,8 +14,7 @@ public static class EnvironmentVariables
     public static int KeyExpirationInDays { get; private set; } = 30;
     public static string? CryptographicAlgorithm { get; private set; }
     public static string AzureKeyVaultUrl { get; private set; } = string.Empty;
-    public static string BrokerQueueName { get; private set; } = string.Empty;
-    public static string BrokerServer { get; private set; } = string.Empty;
+    public static string BrokerHostName { get; private set; } = string.Empty;
     public static string BrokerVirtualHost { get; private set; } = string.Empty;
     public static string BrokerUserName { get; private set; } = string.Empty;
     public static string BrokerPassword { get; private set; } = string.Empty;
@@ -51,12 +50,14 @@ public static class EnvironmentVariables
     private static void LoadVariables()
     {
         DatabaseConnectionString = Environment.GetEnvironmentVariable("TECHNEWS_AUTH_API_DATABASE_CONNECTION_STRING");
+        
         DiscordWebhookId = Environment.GetEnvironmentVariable("TECHNEWS_AUTH_API_DISCORD_WEBHOOK_ID");
         DiscordWebhookToken = Environment.GetEnvironmentVariable("TECHNEWS_AUTH_API_DISCORD_WEBHOOK_TOKEN");
+        
         CryptographicAlgorithm = Environment.GetEnvironmentVariable("CRYPTOGRAPHIC_ALGORITHM");
         AzureKeyVaultUrl = Environment.GetEnvironmentVariable("AZURE_KEY_VAULT_URL") ?? string.Empty;
-        BrokerQueueName = Environment.GetEnvironmentVariable("TECHNEWS_AUTH_API_BROKER_QUEUE_NAME") ?? string.Empty;
-        BrokerServer = Environment.GetEnvironmentVariable("TECHNEWS_AUTH_API_BROKER_SERVER") ?? string.Empty;
+        
+        BrokerHostName = Environment.GetEnvironmentVariable("TECHNEWS_AUTH_API_BROKER_SERVER") ?? string.Empty;
         BrokerVirtualHost = Environment.GetEnvironmentVariable("TECHNEWS_AUTH_API_BROKER_VIRTUAL_HOST") ?? string.Empty;
         BrokerUserName = Environment.GetEnvironmentVariable("TECHNEWS_AUTH_API_BROKER_USER_NAME") ?? string.Empty;
         BrokerPassword = Environment.GetEnvironmentVariable("TECHNEWS_AUTH_API_BROKER_PASSWORD") ?? string.Empty;

@@ -1,29 +1,24 @@
 using System.Net;
-using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using TechNews.Auth.Api.Configurations;
 using TechNews.Auth.Api.Data;
 using TechNews.Auth.Api.Models;
+using TechNews.Common.Library.MessageBus;
+using TechNews.Common.Library.MessageBus.EventMessages.UserRegistered;
 using TechNews.Common.Library.Models;
-using TechNews.Auth.Api.Services.KeyRetrievers;
 
 namespace TechNews.Auth.Api.Controllers;
 
 [Route("api/auth/user")]
 public class UserController : ControllerBase
 {
-    private IBus _bus;
+    private IMessageBus _bus;
     private readonly UserManager<User> _userManager;
-    private readonly SignInManager<User> _signInManager;
-    private readonly ICryptographicKeyRetriever _cryptographicKeyRetriever;
 
-    public UserController(UserManager<User> userManager, SignInManager<User> signInManager, ICryptographicKeyRetriever cryptographicKeyRetriever, IBus bus)
+    public UserController(UserManager<User> userManager, IMessageBus bus)
     {
         _bus = bus;
         _userManager = userManager;
-        _signInManager = signInManager;
-        _cryptographicKeyRetriever = cryptographicKeyRetriever;
     }
 
     /// <summary>
@@ -46,29 +41,36 @@ public class UserController : ControllerBase
         var existingUser = await _userManager.FindByIdAsync(id.ToString());
 
         if (existingUser is not null)
-        {
             return BadRequest(new ApiResponse(error: new ErrorResponse("invalid_request", "UserAlreadyExists", "User already exists")));
-        }
 
         var createUserResult = await _userManager.CreateAsync(new User(id, user.Email, user.UserName), user.Password);
 
         if (!createUserResult.Succeeded)
-        {
             return BadRequest(new ApiResponse(errors: createUserResult.Errors.ToList().ConvertAll(x => new ErrorResponse("invalid_request", x.Code, x.Description))));
-        }
 
         var registeredUserResult = await _userManager.FindByEmailAsync(user.Email);
 
         if (registeredUserResult?.Email is null)
-        {
             return StatusCode((int)HttpStatusCode.InternalServerError, new ApiResponse(error: new ErrorResponse("server_error", "InternalError", "There was an unexpected error with the application. Please contact support!")));
-        }
 
         var emailToken = await _userManager.GenerateEmailConfirmationTokenAsync(registeredUserResult);
-        var endpoint = await _bus.GetSendEndpoint(new Uri($"queue:{EnvironmentVariables.BrokerQueueName}"));
-        var brokerMessage = new ConfirmEmailBrokerMessage(email: registeredUserResult.Email, token: emailToken);
-        
-        await endpoint.Send(brokerMessage);
+
+        var brokerMessage = new UserRegisteredEvent(
+            userId: registeredUserResult.Id,
+            isDeleted: registeredUserResult.IsDeleted,
+            createdAt: registeredUserResult.CreatedAt,
+            userName: registeredUserResult.UserName,
+            email: registeredUserResult.Email,
+            token: emailToken,
+            emailConfirmed: registeredUserResult.EmailConfirmed,
+            lockoutEnabled: registeredUserResult.LockoutEnabled,
+            lockoutEnd: registeredUserResult.LockoutEnd,
+            phoneNumber: registeredUserResult.PhoneNumber,
+            phoneNumberConfirmed: registeredUserResult.PhoneNumberConfirmed,
+            twoFactorEnabled: registeredUserResult.TwoFactorEnabled
+        );
+
+        _bus.Publish(brokerMessage);
 
         return CreatedAtAction(nameof(GetUser), new { userId = id }, new ApiResponse());
     }
@@ -108,7 +110,7 @@ public class UserController : ControllerBase
             UserName = getUserResult.UserName,
             Email = getUserResult.Email,
         };
-
+        
         return Ok(new ApiResponse(data: responseModel));
     }
 }

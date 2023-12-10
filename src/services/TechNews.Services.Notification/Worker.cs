@@ -8,7 +8,7 @@ public class Worker : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            Log.Information("Worker running at: {time}", DateTimeOffset.Now);
+            Log.Debug("Worker running at: {time}", DateTimeOffset.Now);
             await Task.Delay(1000, stoppingToken);
         }
     }
