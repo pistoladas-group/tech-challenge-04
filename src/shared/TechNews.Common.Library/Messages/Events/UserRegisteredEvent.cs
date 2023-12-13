@@ -1,8 +1,6 @@
-﻿using TechNews.Common.Library.MessageBus.EventMessages.Base;
+﻿namespace TechNews.Common.Library.Messages.Events;
 
-namespace TechNews.Common.Library.MessageBus.EventMessages.UserRegistered;
-
-public class UserRegisteredEvent : IntegrationEvent
+public class UserRegisteredEvent
 {
     public Guid UserId { get; set; }
     public bool IsDeleted { get; set; }
@@ -31,19 +29,19 @@ public class UserRegisteredEvent : IntegrationEvent
         string? phoneNumber,
         bool phoneNumberConfirmed,
         bool twoFactorEnabled
-    ) : base(aggregateId: userId, aggregateName: "User", eventName: nameof(UserRegisteredEvent))
+    )
     {
-        this.UserId = userId;
-        this.IsDeleted = isDeleted;
-        this.CreatedAt = createdAt;
-        this.UserName = userName;
-        this.Email = email;
-        this.Token = token;
-        this.EmailConfirmed = emailConfirmed;
-        this.LockoutEnabled = lockoutEnabled;
-        this.LockoutEnd = lockoutEnd;
-        this.PhoneNumber = phoneNumber;
-        this.PhoneNumberConfirmed = phoneNumberConfirmed;
-        this.TwoFactorEnabled = twoFactorEnabled;
+        UserId = userId;
+        IsDeleted = isDeleted;
+        CreatedAt = createdAt;
+        UserName = userName;
+        Email = email;
+        Token = token;
+        EmailConfirmed = emailConfirmed;
+        LockoutEnabled = lockoutEnabled;
+        LockoutEnd = lockoutEnd;
+        PhoneNumber = phoneNumber;
+        PhoneNumberConfirmed = phoneNumberConfirmed;
+        TwoFactorEnabled = twoFactorEnabled;
     }
 }

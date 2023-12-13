@@ -3,16 +3,16 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TechNews.Auth.Api.Data;
 using TechNews.Auth.Api.Models;
-using TechNews.Common.Library.MessageBus;
-using TechNews.Common.Library.MessageBus.EventMessages.UserRegistered;
 using TechNews.Common.Library.Models;
+using TechNews.Common.Library.MessageBus;
+using TechNews.Common.Library.Messages.Events;
 
 namespace TechNews.Auth.Api.Controllers;
 
 [Route("api/auth/user")]
 public class UserController : ControllerBase
 {
-    private IMessageBus _bus;
+    private readonly IMessageBus _bus;
     private readonly UserManager<User> _userManager;
 
     public UserController(UserManager<User> userManager, IMessageBus bus)
@@ -68,7 +68,7 @@ public class UserController : ControllerBase
             phoneNumber: registeredUserResult.PhoneNumber,
             phoneNumberConfirmed: registeredUserResult.PhoneNumberConfirmed,
             twoFactorEnabled: registeredUserResult.TwoFactorEnabled
-        );
+        ); 
 
         _bus.Publish(brokerMessage);
 
@@ -110,7 +110,7 @@ public class UserController : ControllerBase
             UserName = getUserResult.UserName,
             Email = getUserResult.Email,
         };
-        
+
         return Ok(new ApiResponse(data: responseModel));
     }
 }

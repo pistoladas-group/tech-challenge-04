@@ -57,7 +57,7 @@ public static class EnvironmentVariables
         CryptographicAlgorithm = Environment.GetEnvironmentVariable("CRYPTOGRAPHIC_ALGORITHM");
         AzureKeyVaultUrl = Environment.GetEnvironmentVariable("AZURE_KEY_VAULT_URL") ?? string.Empty;
         
-        BrokerHostName = Environment.GetEnvironmentVariable("TECHNEWS_AUTH_API_BROKER_SERVER") ?? string.Empty;
+        BrokerHostName = Environment.GetEnvironmentVariable("TECHNEWS_AUTH_API_BROKER_HOST_NAME") ?? string.Empty;
         BrokerVirtualHost = Environment.GetEnvironmentVariable("TECHNEWS_AUTH_API_BROKER_VIRTUAL_HOST") ?? string.Empty;
         BrokerUserName = Environment.GetEnvironmentVariable("TECHNEWS_AUTH_API_BROKER_USER_NAME") ?? string.Empty;
         BrokerPassword = Environment.GetEnvironmentVariable("TECHNEWS_AUTH_API_BROKER_PASSWORD") ?? string.Empty;

@@ -6,7 +6,7 @@ namespace TechNews.Services.Notification.Configurations;
 public static class EnvironmentVariables
 {
     public static string BrokerConfirmEmailQueueName { get; private set; } = string.Empty;
-    public static string BrokerServer { get; private set; } = string.Empty;
+    public static string BrokerHostName { get; private set; } = string.Empty;
     public static string BrokerVirtualHost { get; private set; } = string.Empty;
     public static string BrokerUserName { get; private set; } = string.Empty;
     public static string BrokerPassword { get; private set; } = string.Empty;
@@ -44,10 +44,12 @@ public static class EnvironmentVariables
     private static void LoadVariables()
     {
         BrokerConfirmEmailQueueName = Environment.GetEnvironmentVariable("TECHNEWS_SERVICES_NOTIFICATION_BROKER_CONFIRM_EMAIL_QUEUE_NAME") ?? string.Empty;
-        BrokerServer = Environment.GetEnvironmentVariable("TECHNEWS_SERVICES_NOTIFICATION_BROKER_SERVER") ?? string.Empty;
+
+        BrokerHostName = Environment.GetEnvironmentVariable("TECHNEWS_AUTH_API_BROKER_HOST_NAME") ?? string.Empty;
         BrokerVirtualHost = Environment.GetEnvironmentVariable("TECHNEWS_SERVICES_NOTIFICATION_BROKER_VIRTUAL_HOST") ?? string.Empty;
         BrokerUserName = Environment.GetEnvironmentVariable("TECHNEWS_SERVICES_NOTIFICATION_BROKER_USER_NAME") ?? string.Empty;
         BrokerPassword = Environment.GetEnvironmentVariable("TECHNEWS_SERVICES_NOTIFICATION_BROKER_PASSWORD") ?? string.Empty;
+
         DiscordWebhookId = Environment.GetEnvironmentVariable("TECHNEWS_SERVICES_NOTIFICATION_DISCORD_WEBHOOK_ID");
         DiscordWebhookToken = Environment.GetEnvironmentVariable("TECHNEWS_SERVICES_NOTIFICATION_DISCORD_WEBHOOK_TOKEN");
     }

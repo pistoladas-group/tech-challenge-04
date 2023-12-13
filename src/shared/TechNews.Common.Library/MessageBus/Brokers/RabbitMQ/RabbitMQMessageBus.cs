@@ -1,8 +1,9 @@
 ﻿using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.SignalR;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using TechNews.Common.Library.MessageBus.EventMessages.Base;
+using TechNews.Common.Library.Messages;
 
 namespace TechNews.Common.Library.MessageBus.Brokers.RabbitMQ;
 
@@ -10,7 +11,7 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
 {
     private IModel _channel { get; }
     private IConnection _connection { get; }
-    
+
     public RabbitMQMessageBus(RabbitMQMessageBusParameters parameters)
     {
         var factory = new ConnectionFactory
@@ -24,7 +25,7 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
         _connection = factory.CreateConnection();
         _channel = _connection.CreateModel();
     }
-    
+
     public void Publish<T>(T message)
     {
         var eventName = typeof(T).Name;
@@ -33,6 +34,8 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
         var encodedMessage = Encoding.UTF8.GetBytes(serializedMessage);
 
         var deadLetterQueueName = $"{eventName}-DeadLetter";
+
+        // TODO: Fazer os declares e binds apenas uma vez
 
         _channel.ExchangeDeclare(
             exchange: eventName,
@@ -49,7 +52,7 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
             autoDelete: false,
             arguments: null
         );
-        
+
         _channel.QueueBind(
             queue: deadLetterQueueName,
             exchange: eventName,
@@ -65,8 +68,14 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
         );
     }
 
-    public void Consume<T>(string queueName, Action<T?> executeAfterConsumed) where T : IntegrationEvent
+    // UserRegisteredEvent
+    public void Consume<T>(string queueName, Action<T?> executeAfterConsumed)
     {
+        var eventName = typeof(T).Name;
+        var deadLetterQueueName = $"{eventName}-DeadLetter";
+
+        // TODO: Fazer os declares e binds apenas uma vez
+
         _channel.QueueDeclare(
             queue: queueName,
             durable: true,
@@ -74,17 +83,60 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
             autoDelete: false,
             arguments: null
         );
-        
+
+        _channel.QueueBind(
+            queue: queueName,
+            exchange: eventName,
+            routingKey: string.Empty,
+            arguments: null
+        );
+
+        // TODO: Mover mensagens de deadletter para a fila principal
+
+        _channel.QueueUnbind(
+            queue: deadLetterQueueName,
+            exchange: eventName,
+            routingKey: string.Empty,
+            arguments: null);
+
         var consumer = new EventingBasicConsumer(_channel);
 
         consumer.Received += (sender, eventArgs) =>
         {
-            var encodedMessage = eventArgs.Body.ToArray();
-            var decodedMessage = Encoding.UTF8.GetString(encodedMessage);
+            var encodedBody = eventArgs.Body.ToArray();
+            var decodedBody = Encoding.UTF8.GetString(encodedBody);
 
-            var resultMessage = JsonSerializer.Deserialize<T>(decodedMessage);
-            
-            executeAfterConsumed(resultMessage);
+            var message = JsonSerializer.Deserialize<T>(decodedBody);
+
+            try
+            {
+                executeAfterConsumed(message);
+            }
+            catch (Exception ex)
+            {
+                _channel.QueueDeclare(
+                    queue: $"{queueName}-Error",
+                    durable: true,
+                    exclusive: false,
+                    autoDelete: false,
+                    arguments: null
+                );
+
+                var serializedMessage = JsonSerializer.Serialize(new ErrorMessage()
+                {
+                    Description = ex.Message,
+                    StackTrace = ex.StackTrace,
+                    Message = decodedBody
+                });
+                var encodedMessage = Encoding.UTF8.GetBytes(serializedMessage);
+
+                _channel.BasicPublish(
+                    exchange: string.Empty,
+                    routingKey: $"{queueName}-Error",
+                    basicProperties: null,
+                    body: encodedMessage
+                );
+            }
         };
 
         _channel.BasicConsume(
@@ -99,11 +151,4 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
         _connection.Dispose();
         _channel.Dispose();
     }
-    // public void Test()
-    // {
-    //     Consume<Order>("teste", x =>
-    //     {
-    //         Console.WriteLine("teste");
-    //     });
-    // }
 }
