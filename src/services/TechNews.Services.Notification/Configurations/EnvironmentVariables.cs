@@ -45,7 +45,7 @@ public static class EnvironmentVariables
     {
         BrokerConfirmEmailQueueName = Environment.GetEnvironmentVariable("TECHNEWS_SERVICES_NOTIFICATION_BROKER_CONFIRM_EMAIL_QUEUE_NAME") ?? string.Empty;
 
-        BrokerHostName = Environment.GetEnvironmentVariable("TECHNEWS_AUTH_API_BROKER_HOST_NAME") ?? string.Empty;
+        BrokerHostName = Environment.GetEnvironmentVariable("TECHNEWS_SERVICES_NOTIFICATION_BROKER_HOST_NAME") ?? string.Empty;
         BrokerVirtualHost = Environment.GetEnvironmentVariable("TECHNEWS_SERVICES_NOTIFICATION_BROKER_VIRTUAL_HOST") ?? string.Empty;
         BrokerUserName = Environment.GetEnvironmentVariable("TECHNEWS_SERVICES_NOTIFICATION_BROKER_USER_NAME") ?? string.Empty;
         BrokerPassword = Environment.GetEnvironmentVariable("TECHNEWS_SERVICES_NOTIFICATION_BROKER_PASSWORD") ?? string.Empty;

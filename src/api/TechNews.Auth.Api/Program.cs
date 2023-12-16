@@ -12,6 +12,7 @@ builder.Services
     .AddLoggingConfiguration(builder.Host)
     .ConfigureIdentity()
     .ConfigureDatabase()
+    .ConfigureEventStore()
     .ConfigureCryptographicKeys()
     .ConfigureBackgroundServices()
     .AddApplicationInsightsTelemetry(options =>
