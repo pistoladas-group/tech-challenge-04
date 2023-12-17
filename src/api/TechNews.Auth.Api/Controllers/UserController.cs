@@ -68,9 +68,21 @@ public class UserController : ControllerBase
             phoneNumber: registeredUserResult.PhoneNumber,
             phoneNumberConfirmed: registeredUserResult.PhoneNumberConfirmed,
             twoFactorEnabled: registeredUserResult.TwoFactorEnabled
-        ); 
+        );
 
-        _bus.Publish(brokerMessage);
+        try
+        {
+            _bus.Publish(brokerMessage);
+        }
+        catch (Exception)
+        {
+            // TODO: Ajustar forma como o usuário é tratado quando deletado
+            // porque o Identity não irá deixar criar outro com os mesmos dados
+            // só com a coluna IsDeleted = true
+            registeredUserResult.Delete();
+            await _userManager.UpdateAsync(registeredUserResult);
+            throw;
+        }
 
         return CreatedAtAction(nameof(GetUser), new { userId = id }, new ApiResponse());
     }
