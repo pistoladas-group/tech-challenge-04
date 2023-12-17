@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using System.Text.Json;
-using Microsoft.AspNetCore.SignalR;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using TechNews.Common.Library.Messages;
@@ -9,8 +8,14 @@ namespace TechNews.Common.Library.MessageBus.Brokers.RabbitMQ;
 
 public class RabbitMQMessageBus : IMessageBus, IDisposable
 {
-    private IModel _channel { get; }
-    private IConnection _connection { get; }
+    private readonly IModel _channel;
+    private readonly IConnection _connection;
+
+    private const string DEAD_LETTER_QUEUE_NAME_PATTERN = "{0}-DeadLetter";
+    private const string ERROR_QUEUE_NAME_PATTERN = "{0}-Error";
+
+    private HashSet<string> Exchanges { get; set; } = new HashSet<string>();
+    private HashSet<string> Queues { get; set; } = new HashSet<string>();
 
     public RabbitMQMessageBus(RabbitMQMessageBusParameters parameters)
     {
@@ -30,74 +35,34 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
     {
         var eventName = typeof(T).Name;
 
-        var serializedMessage = JsonSerializer.Serialize(message);
-        var encodedMessage = Encoding.UTF8.GetBytes(serializedMessage);
-
-        var deadLetterQueueName = $"{eventName}-DeadLetter";
-
         // TODO: Fazer os declares e binds apenas uma vez
 
-        _channel.ExchangeDeclare(
-            exchange: eventName,
-            type: ExchangeType.Fanout,
-            durable: true,
-            autoDelete: false,
-            arguments: null
-        );
-
-        _channel.QueueDeclare(
-            queue: deadLetterQueueName,
-            durable: true,
-            exclusive: false,
-            autoDelete: false,
-            arguments: null
-        );
-
-        _channel.QueueBind(
-            queue: deadLetterQueueName,
-            exchange: eventName,
-            routingKey: string.Empty,
-            arguments: null
-        );
+        CreateExchangeIfNonExistent(exchangeName: eventName, type: ExchangeType.Fanout);
+        CreateQueueIfNonExistent(queueName: string.Format(DEAD_LETTER_QUEUE_NAME_PATTERN, eventName), exchangeToBind: eventName);
 
         _channel.BasicPublish(
             exchange: eventName,
             routingKey: string.Empty,
             basicProperties: null,
-            body: encodedMessage
+            body: EncodeMessageToBytes(message)
         );
     }
 
-    // UserRegisteredEvent
     public void Consume<T>(string queueName, Action<T?> executeAfterConsumed)
     {
         var eventName = typeof(T).Name;
-        var deadLetterQueueName = $"{eventName}-DeadLetter";
 
         // TODO: Fazer os declares e binds apenas uma vez
 
-        _channel.QueueDeclare(
-            queue: queueName,
-            durable: true,
-            exclusive: false,
-            autoDelete: false,
-            arguments: null
-        );
-
-        _channel.QueueBind(
-            queue: queueName,
-            exchange: eventName,
-            routingKey: string.Empty,
-            arguments: null
-        );
-
-        // TODO: Mover mensagens de deadletter para a fila principal
+        CreateQueueIfNonExistent(queueName: queueName, exchangeToBind: eventName);
 
         _channel.QueueUnbind(
-            queue: deadLetterQueueName,
+            queue: string.Format(DEAD_LETTER_QUEUE_NAME_PATTERN, eventName),
             exchange: eventName,
             routingKey: string.Empty,
             arguments: null);
+
+        // TODO: Mover mensagens de deadletter para a fila principal depois do unbind
 
         var consumer = new EventingBasicConsumer(_channel);
 
@@ -114,34 +79,25 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
             }
             catch (Exception ex)
             {
-                _channel.QueueDeclare(
-                    queue: $"{queueName}-Error",
-                    durable: true,
-                    exclusive: false,
-                    autoDelete: false,
-                    arguments: null
-                );
-
-                var serializedMessage = JsonSerializer.Serialize(new ErrorMessage()
-                {
-                    Description = ex.Message,
-                    StackTrace = ex.StackTrace,
-                    Message = decodedBody
-                });
-                var encodedMessage = Encoding.UTF8.GetBytes(serializedMessage);
+                CreateQueueIfNonExistent(queueName: string.Format(ERROR_QUEUE_NAME_PATTERN, queueName));
 
                 _channel.BasicPublish(
                     exchange: string.Empty,
-                    routingKey: $"{queueName}-Error",
+                    routingKey: string.Format(ERROR_QUEUE_NAME_PATTERN, queueName),
                     basicProperties: null,
-                    body: encodedMessage
+                    body: EncodeMessageToBytes(new ErrorMessage()
+                    {
+                        Description = ex.Message,
+                        StackTrace = ex.StackTrace,
+                        Message = decodedBody
+                    })
                 );
             }
         };
 
         _channel.BasicConsume(
             queue: queueName,
-            autoAck: true, //automatically remove message from queue when processed
+            autoAck: true, // automatically remove message from queue when processed
             consumer: consumer
         );
     }
@@ -150,5 +106,63 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
     {
         _connection.Dispose();
         _channel.Dispose();
+    }
+
+
+    private byte[] EncodeMessageToBytes<T>(T message)
+    {
+        var serializedMessage = JsonSerializer.Serialize(message);
+        return Encoding.UTF8.GetBytes(serializedMessage);
+    }
+
+    private void CreateExchangeIfNonExistent(
+        string exchangeName,
+        string type,
+        bool durable = true,
+        bool autoDelete = false,
+        IDictionary<string, object>? arguments = null)
+    {
+        if (Exchanges.Contains(exchangeName)) return;
+
+        _channel.ExchangeDeclare(
+            exchange: exchangeName,
+            type: type,
+            durable: durable,
+            autoDelete: autoDelete,
+            arguments: arguments
+        );
+
+        Exchanges.Add(exchangeName);
+    }
+
+    private void CreateQueueIfNonExistent(
+        string queueName,
+        string? exchangeToBind = null,
+        string routingKey = "",
+        bool durable = true,
+        bool exclusive = false,
+        bool autoDelete = false,
+        IDictionary<string, object>? arguments = null)
+    {
+        if (Queues.Contains(queueName)) return;
+
+        _channel.QueueDeclare(
+            queue: queueName,
+            durable: durable,
+            exclusive: exclusive,
+            autoDelete: autoDelete,
+            arguments: arguments
+        );
+
+        Queues.Add(queueName);
+
+        if (exchangeToBind == null) return;
+
+        _channel.QueueBind(
+            queue: queueName,
+            exchange: exchangeToBind,
+            routingKey: routingKey,
+            arguments: arguments
+        );
     }
 }

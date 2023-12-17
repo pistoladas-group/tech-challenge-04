@@ -2,18 +2,18 @@
 
 public class UserRegisteredEvent
 {
-    public Guid UserId { get; set; }
-    public bool IsDeleted { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public string? UserName { get; set; }
-    public string Email { get; set; }
-    public string Token { get; set; }
-    public bool EmailConfirmed { get; set; }
-    public bool LockoutEnabled { get; set; }
-    public DateTimeOffset? LockoutEnd { get; set; }
-    public string? PhoneNumber { get; set; }
-    public bool PhoneNumberConfirmed { get; set; }
-    public bool TwoFactorEnabled { get; set; }
+    public Guid UserId { get; init; }
+    public bool IsDeleted { get; init; }
+    public DateTime CreatedAt { get; init; }
+    public string? UserName { get; init; }
+    public string Email { get; init; }
+    public string Token { get; init; }
+    public bool EmailConfirmed { get; init; }
+    public bool LockoutEnabled { get; init; }
+    public DateTimeOffset? LockoutEnd { get; init; }
+    public string? PhoneNumber { get; init; }
+    public bool PhoneNumberConfirmed { get; init; }
+    public bool TwoFactorEnabled { get; init; }
 
     public UserRegisteredEvent
     (
