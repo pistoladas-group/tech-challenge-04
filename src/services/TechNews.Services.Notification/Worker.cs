@@ -1,3 +1,5 @@
+using MailKit.Net.Smtp;
+using MimeKit;
 using Serilog;
 using TechNews.Common.Library.MessageBus;
 using TechNews.Common.Library.Messages.Events;
@@ -19,11 +21,41 @@ public class Worker : BackgroundService
     {
         _bus.Consume<UserRegisteredEvent>(EnvironmentVariables.BrokerConfirmEmailQueueName, ExecuteAfterConsumed);
     }
-    
 
     public void ExecuteAfterConsumed(UserRegisteredEvent? message)
     {
-        // TODO: Disparar email de confirma��o com o Token
-        Log.Debug("Message Consumed", DateTimeOffset.Now);
+        Log.Information("Message receveived: @{message}", message);
+
+        if (message is not null)
+            SendEmail(message);
+    }
+
+    private void SendEmail(UserRegisteredEvent userRegisteredDetails)
+    {
+        var message = new MimeMessage();
+        message.From.Add(new MailboxAddress("TechNews", EnvironmentVariables.SmtpEmail));
+        message.To.Add(new MailboxAddress(userRegisteredDetails.UserName, userRegisteredDetails.Email));
+        message.Subject = "TechNews - Email confirmation";
+
+        var bodyBuilder = new BodyBuilder
+        {
+            HtmlBody = $@"<b>Olá {userRegisteredDetails.UserName}</b>,
+
+<p>Clique no link abaixo para concluir seu cadastro em nosso site e ter acesso às notícias mais quentinhas da web!</p>
+
+<p><a href=""https://localhost:7283/email-confirmation/{userRegisteredDetails.ValidateEmailToken}"">Confirmar e-mail</a></p>
+
+Até logo!"
+        };
+
+        message.Body = bodyBuilder.ToMessageBody();
+
+        using var client = new SmtpClient();
+        client.Connect(EnvironmentVariables.SmtpHost, EnvironmentVariables.SmtpPort, false);
+        client.AuthenticationMechanisms.Remove("XOAUTH2");
+        client.Authenticate(EnvironmentVariables.SmtpEmail, EnvironmentVariables.SmtpPassword);
+
+        client.Send(message);
+        client.Disconnect(true);
     }
 }

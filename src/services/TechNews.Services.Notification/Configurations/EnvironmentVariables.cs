@@ -12,6 +12,13 @@ public static class EnvironmentVariables
     public static string BrokerPassword { get; private set; } = string.Empty;
     public static string? DiscordWebhookId { get; private set; }
     public static string? DiscordWebhookToken { get; private set; }
+    
+    public static string SmtpHost { get; private set; } = string.Empty;
+    public static int SmtpPort { get; private set; }
+    public static string SmtpEmail { get; private set; } = string.Empty;
+    public static string SmtpPassword { get; private set; } = string.Empty;
+
+
 
     public static IServiceCollection AddEnvironmentVariables(this IServiceCollection services, IHostEnvironment environment)
     {
@@ -49,6 +56,11 @@ public static class EnvironmentVariables
         BrokerVirtualHost = Environment.GetEnvironmentVariable("TECHNEWS_SERVICES_NOTIFICATION_BROKER_VIRTUAL_HOST") ?? string.Empty;
         BrokerUserName = Environment.GetEnvironmentVariable("TECHNEWS_SERVICES_NOTIFICATION_BROKER_USER_NAME") ?? string.Empty;
         BrokerPassword = Environment.GetEnvironmentVariable("TECHNEWS_SERVICES_NOTIFICATION_BROKER_PASSWORD") ?? string.Empty;
+        
+        SmtpHost = Environment.GetEnvironmentVariable("TECHNEWS_SERVICES_NOTIFICATION_SMTP_HOST") ?? string.Empty;
+        SmtpPort = Convert.ToInt32(Environment.GetEnvironmentVariable("TECHNEWS_SERVICES_NOTIFICATION_SMTP_PORT"));
+        SmtpEmail = Environment.GetEnvironmentVariable("TECHNEWS_SERVICES_NOTIFICATION_SMTP_EMAIL") ?? string.Empty;
+        SmtpPassword = Environment.GetEnvironmentVariable("TECHNEWS_SERVICES_NOTIFICATION_SMTP_PASSWORD") ?? string.Empty;
 
         DiscordWebhookId = Environment.GetEnvironmentVariable("TECHNEWS_SERVICES_NOTIFICATION_DISCORD_WEBHOOK_ID");
         DiscordWebhookToken = Environment.GetEnvironmentVariable("TECHNEWS_SERVICES_NOTIFICATION_DISCORD_WEBHOOK_TOKEN");

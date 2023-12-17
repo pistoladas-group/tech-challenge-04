@@ -2,6 +2,7 @@
 using System.Text.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using TechNews.Common.Library.Extensions;
 using TechNews.Common.Library.Messages;
 using TechNews.Common.Library.Messages.Events;
 
@@ -12,11 +13,11 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
     private readonly IModel _channel;
     private readonly IConnection _connection;
 
-    private const string DEAD_LETTER_QUEUE_NAME_PATTERN = "{0}-DeadLetter";
-    private const string ERROR_QUEUE_NAME_PATTERN = "{0}-Error";
+    private const string DEAD_LETTER_QUEUE_NAME_PATTERN = "{0}.dead-letter";
+    private const string ERROR_QUEUE_NAME_PATTERN = "{0}.error";
 
-    private HashSet<string> Exchanges { get; set; } = new HashSet<string>();
-    private HashSet<string> Queues { get; set; } = new HashSet<string>();
+    private HashSet<string> Exchanges { get; set; } = new();
+    private HashSet<string> Queues { get; set; } = new();
 
     public RabbitMQMessageBus(RabbitMQMessageBusParameters parameters)
     {
@@ -34,7 +35,7 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
 
     public void Publish<T>(T message) where T : IEvent
     {
-        var eventName = typeof(T).Name;
+        var eventName = typeof(T).Name.ToLowerKebabCase();
 
         // TODO: Fazer os declares e binds apenas uma vez
 
@@ -51,10 +52,12 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
 
     public void Consume<T>(string queueName, Action<T?> executeAfterConsumed) where T : IEvent
     {
-        var eventName = typeof(T).Name;
+        var eventName = typeof(T).Name.ToLowerKebabCase();
+        queueName = queueName.ToLowerKebabCase();
 
         // TODO: Fazer os declares e binds apenas uma vez
 
+        CreateExchangeIfNonExistent(exchangeName: eventName, type: ExchangeType.Fanout);
         CreateQueueIfNonExistent(queueName: queueName, exchangeToBind: eventName);
 
         _channel.QueueUnbind(
@@ -85,7 +88,7 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
                     exchange: string.Empty,
                     routingKey: string.Format(ERROR_QUEUE_NAME_PATTERN, queueName),
                     basicProperties: null,
-                    body: EncodeMessageToBytes(new ErrorMessage()
+                    body: EncodeMessageToBytes(new ErrorMessage
                     {
                         Description = ex.Message,
                         StackTrace = ex.StackTrace,
@@ -122,7 +125,8 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
         bool autoDelete = false,
         IDictionary<string, object>? arguments = null)
     {
-        if (Exchanges.Contains(exchangeName)) return;
+        if (Exchanges.Contains(exchangeName)) 
+            return;
 
         _channel.ExchangeDeclare(
             exchange: exchangeName,
@@ -144,7 +148,8 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
         bool autoDelete = false,
         IDictionary<string, object>? arguments = null)
     {
-        if (Queues.Contains(queueName)) return;
+        if (Queues.Contains(queueName)) 
+            return;
 
         _channel.QueueDeclare(
             queue: queueName,
@@ -156,7 +161,8 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
 
         Queues.Add(queueName);
 
-        if (exchangeToBind == null) return;
+        if (exchangeToBind == null) 
+            return;
 
         _channel.QueueBind(
             queue: queueName,
