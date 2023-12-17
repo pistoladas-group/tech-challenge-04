@@ -1,13 +1,16 @@
-﻿namespace TechNews.Common.Library.Messages.Events;
+﻿using System.Text.Json;
+using EventStore.Client;
 
-public class UserRegisteredEvent
+namespace TechNews.Common.Library.Messages.Events;
+
+public class UserRegisteredEvent : IEvent
 {
     public Guid UserId { get; init; }
     public bool IsDeleted { get; init; }
     public DateTime CreatedAt { get; init; }
     public string? UserName { get; init; }
     public string Email { get; init; }
-    public string Token { get; init; }
+    public string ValidateEmailToken { get; init; }
     public bool EmailConfirmed { get; init; }
     public bool LockoutEnabled { get; init; }
     public DateTimeOffset? LockoutEnd { get; init; }
@@ -22,7 +25,7 @@ public class UserRegisteredEvent
         DateTime createdAt,
         string? userName,
         string email,
-        string token,
+        string validateEmailToken,
         bool emailConfirmed,
         bool lockoutEnabled,
         DateTimeOffset? lockoutEnd,
@@ -36,12 +39,25 @@ public class UserRegisteredEvent
         CreatedAt = createdAt;
         UserName = userName;
         Email = email;
-        Token = token;
+        ValidateEmailToken = validateEmailToken;
         EmailConfirmed = emailConfirmed;
         LockoutEnabled = lockoutEnabled;
         LockoutEnd = lockoutEnd;
         PhoneNumber = phoneNumber;
         PhoneNumberConfirmed = phoneNumberConfirmed;
         TwoFactorEnabled = twoFactorEnabled;
+    }
+
+    public string GetStreamName()
+    {
+        return $"User-{UserId}";
+    }
+
+    public EventData[] GetEventData()
+    {
+        var utf8Bytes = JsonSerializer.SerializeToUtf8Bytes(this);
+        var eventData = new EventData(Uuid.NewUuid(), nameof(UserRegisteredEvent), utf8Bytes.AsMemory());
+
+        return new[] { eventData };
     }
 }

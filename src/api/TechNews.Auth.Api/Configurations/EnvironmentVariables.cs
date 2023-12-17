@@ -18,6 +18,7 @@ public static class EnvironmentVariables
     public static string BrokerVirtualHost { get; private set; } = string.Empty;
     public static string BrokerUserName { get; private set; } = string.Empty;
     public static string BrokerPassword { get; private set; } = string.Empty;
+    public static string EventStoreConnectionString { get; private set; } = string.Empty;
 
     public static IServiceCollection AddEnvironmentVariables(this IServiceCollection services, IWebHostEnvironment environment)
     {
@@ -61,6 +62,8 @@ public static class EnvironmentVariables
         BrokerVirtualHost = Environment.GetEnvironmentVariable("TECHNEWS_AUTH_API_BROKER_VIRTUAL_HOST") ?? string.Empty;
         BrokerUserName = Environment.GetEnvironmentVariable("TECHNEWS_AUTH_API_BROKER_USER_NAME") ?? string.Empty;
         BrokerPassword = Environment.GetEnvironmentVariable("TECHNEWS_AUTH_API_BROKER_PASSWORD") ?? string.Empty;
+        
+        EventStoreConnectionString = Environment.GetEnvironmentVariable("TECHNEWS_AUTH_API_EVENT_STORE_CONNECTION_STRING") ?? string.Empty;
 
         int.TryParse(Environment.GetEnvironmentVariable("TOKEN_EXPIRATION_IN_MINUTES"), out var parsedExpiration);
 

@@ -1,4 +1,5 @@
 using System.Net;
+using EventStore.Client;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TechNews.Auth.Api.Data;
@@ -14,11 +15,13 @@ public class UserController : ControllerBase
 {
     private readonly IMessageBus _bus;
     private readonly UserManager<User> _userManager;
+    private readonly EventStoreClient _eventStoreClient;
 
-    public UserController(UserManager<User> userManager, IMessageBus bus)
+    public UserController(UserManager<User> userManager, IMessageBus bus, EventStoreClient eventStoreClient)
     {
         _bus = bus;
         _userManager = userManager;
+        _eventStoreClient = eventStoreClient;
     }
 
     /// <summary>
@@ -55,13 +58,13 @@ public class UserController : ControllerBase
 
         var emailToken = await _userManager.GenerateEmailConfirmationTokenAsync(registeredUserResult);
 
-        var brokerMessage = new UserRegisteredEvent(
+        var userRegisteredEvent = new UserRegisteredEvent(
             userId: registeredUserResult.Id,
             isDeleted: registeredUserResult.IsDeleted,
             createdAt: registeredUserResult.CreatedAt,
             userName: registeredUserResult.UserName,
             email: registeredUserResult.Email,
-            token: emailToken,
+            validateEmailToken: emailToken,
             emailConfirmed: registeredUserResult.EmailConfirmed,
             lockoutEnabled: registeredUserResult.LockoutEnabled,
             lockoutEnd: registeredUserResult.LockoutEnd,
@@ -72,7 +75,8 @@ public class UserController : ControllerBase
 
         try
         {
-            _bus.Publish(brokerMessage);
+            await _eventStoreClient.AppendToStreamAsync(userRegisteredEvent.GetStreamName(), StreamState.Any, userRegisteredEvent.GetEventData());
+            _bus.Publish(userRegisteredEvent);
         }
         catch (Exception)
         {

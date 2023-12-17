@@ -3,6 +3,7 @@ using System.Text.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using TechNews.Common.Library.Messages;
+using TechNews.Common.Library.Messages.Events;
 
 namespace TechNews.Common.Library.MessageBus.Brokers.RabbitMQ;
 
@@ -31,7 +32,7 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
         _channel = _connection.CreateModel();
     }
 
-    public void Publish<T>(T message)
+    public void Publish<T>(T message) where T : IEvent
     {
         var eventName = typeof(T).Name;
 
@@ -48,7 +49,7 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
         );
     }
 
-    public void Consume<T>(string queueName, Action<T?> executeAfterConsumed)
+    public void Consume<T>(string queueName, Action<T?> executeAfterConsumed) where T : IEvent
     {
         var eventName = typeof(T).Name;
 
@@ -70,7 +71,6 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
         {
             var encodedBody = eventArgs.Body.ToArray();
             var decodedBody = Encoding.UTF8.GetString(encodedBody);
-
             var message = JsonSerializer.Deserialize<T>(decodedBody);
 
             try

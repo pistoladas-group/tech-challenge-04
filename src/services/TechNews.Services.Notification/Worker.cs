@@ -14,14 +14,16 @@ public class Worker : BackgroundService
         _bus = bus;
     }
 
+    //TODO: configurar as filas sem precisar do mÃ©todo consume
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _bus.Consume<UserRegisteredEvent>(EnvironmentVariables.BrokerConfirmEmailQueueName, ExecuteAfterConsumed);
     }
+    
 
     public void ExecuteAfterConsumed(UserRegisteredEvent? message)
     {
-        // TODO: Disparar email de confirmação com o Token
+        // TODO: Disparar email de confirmaï¿½ï¿½o com o Token
         Log.Debug("Message Consumed", DateTimeOffset.Now);
     }
 }
