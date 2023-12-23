@@ -123,6 +123,26 @@ public class AccountController : Controller
         return Redirect("Login");
     }
 
+    [AllowAnonymous]
+    [HttpGet("email-confirmation")]
+    public async Task<IActionResult> ConfirmEmailAsync(string email, string token)
+    {
+        var client = _httpFactory.CreateClient();
+        var content = new StringContent(JsonSerializer.Serialize(new { Email = Encoding.UTF8.GetString(Convert.FromBase64String(email)), Token = Encoding.UTF8.GetString(Convert.FromBase64String(token)) }), Encoding.UTF8, "application/json");
+        var uri = $"{EnvironmentVariables.ApiAuthBaseUrl}/api/auth/account/confirmation";
+
+        var apiResponse = await client.PostAsync(uri, content);
+
+        if (!apiResponse.IsSuccessStatusCode)
+        {
+            // TODO: Tratar tela de erro corretamente
+            return View("Login");
+        }
+
+        return View("Login");
+    }
+
+
     private static JwtSecurityToken? GetTokenFromString(string? jwtToken)
     {
         return new JwtSecurityTokenHandler().ReadToken(jwtToken) as JwtSecurityToken;
