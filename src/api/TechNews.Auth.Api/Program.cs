@@ -1,3 +1,4 @@
+using Serilog;
 using TechNews.Auth.Api.Configurations;
 using TechNews.Common.Library.Middlewares;
 
@@ -21,6 +22,7 @@ builder.Services
 var app = builder.Build();
 
 app.UseSwaggerConfiguration();
+app.UseLoggingConfiguration();
 app.UseHsts();
 app.UseHttpsRedirection();
 app.UseMiddleware<ResponseHeaderMiddleware>();

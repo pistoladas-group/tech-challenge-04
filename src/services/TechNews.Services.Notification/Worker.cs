@@ -25,7 +25,7 @@ public class Worker : BackgroundService
 
     public void ExecuteAfterConsumed(UserRegisteredEvent? message)
     {
-        Log.Information("Message receveived: @{message}", message);
+        Log.Information("Message receveived: {@message}", message);
 
         if (message is not null)
             SendEmail(message);
