@@ -10,7 +10,9 @@ public class UserRegisteredEvent : IEvent
     public DateTime CreatedAt { get; init; }
     public string? UserName { get; init; }
     public string Email { get; init; }
+    public string EmailBase64 { get; init; }
     public string ValidateEmailToken { get; init; }
+    public string ValidateEmailTokenBase64 { get; init; }
     public bool EmailConfirmed { get; init; }
     public bool LockoutEnabled { get; init; }
     public DateTimeOffset? LockoutEnd { get; init; }
@@ -25,7 +27,9 @@ public class UserRegisteredEvent : IEvent
         DateTime createdAt,
         string? userName,
         string email,
+        string emailBase64,
         string validateEmailToken,
+        string validateEmailTokenBase64,
         bool emailConfirmed,
         bool lockoutEnabled,
         DateTimeOffset? lockoutEnd,
@@ -39,7 +43,9 @@ public class UserRegisteredEvent : IEvent
         CreatedAt = createdAt;
         UserName = userName;
         Email = email;
+        EmailBase64 = emailBase64;
         ValidateEmailToken = validateEmailToken;
+        ValidateEmailTokenBase64 = validateEmailTokenBase64;
         EmailConfirmed = emailConfirmed;
         LockoutEnabled = lockoutEnabled;
         LockoutEnd = lockoutEnd;

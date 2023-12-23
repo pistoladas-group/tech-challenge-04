@@ -37,8 +37,6 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
     {
         var eventName = typeof(T).Name.ToLowerKebabCase();
 
-        // TODO: Fazer os declares e binds apenas uma vez
-
         CreateExchangeIfNonExistent(exchangeName: eventName, type: ExchangeType.Fanout);
         CreateQueueIfNonExistent(queueName: string.Format(DEAD_LETTER_QUEUE_NAME_PATTERN, eventName), exchangeToBind: eventName);
 
@@ -54,8 +52,6 @@ public class RabbitMQMessageBus : IMessageBus, IDisposable
     {
         var eventName = typeof(T).Name.ToLowerKebabCase();
         queueName = queueName.ToLowerKebabCase();
-
-        // TODO: Fazer os declares e binds apenas uma vez
 
         CreateExchangeIfNonExistent(exchangeName: eventName, type: ExchangeType.Fanout);
         CreateQueueIfNonExistent(queueName: queueName, exchangeToBind: eventName);
