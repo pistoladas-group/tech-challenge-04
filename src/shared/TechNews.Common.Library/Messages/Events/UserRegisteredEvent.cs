@@ -60,4 +60,9 @@ public class UserRegisteredEvent : IEvent
 
         return new[] { eventData };
     }
+
+    public override string ToString()
+    {
+        return JsonSerializer.Serialize(this);
+    }
 }
