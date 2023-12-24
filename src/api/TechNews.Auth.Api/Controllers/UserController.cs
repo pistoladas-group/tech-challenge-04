@@ -64,9 +64,7 @@ public class UserController : ControllerBase
             createdAt: registeredUserResult.CreatedAt,
             userName: registeredUserResult.UserName,
             email: registeredUserResult.Email,
-            emailBase64: Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(registeredUserResult.Email)),
             validateEmailToken: emailToken,
-            validateEmailTokenBase64: Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(emailToken)),
             emailConfirmed: registeredUserResult.EmailConfirmed,
             lockoutEnabled: registeredUserResult.LockoutEnabled,
             lockoutEnd: registeredUserResult.LockoutEnd,
@@ -82,9 +80,9 @@ public class UserController : ControllerBase
         }
         catch (Exception)
         {
-            // TODO: Ajustar forma como o usuário é tratado quando deletado
-            // porque o Identity não irá deixar criar outro com os mesmos dados
-            // só com a coluna IsDeleted = true
+            // TODO: Ajustar forma como o usuï¿½rio ï¿½ tratado quando deletado
+            // porque o Identity nï¿½o irï¿½ deixar criar outro com os mesmos dados
+            // sï¿½ com a coluna IsDeleted = true
             registeredUserResult.Delete();
             await _userManager.UpdateAsync(registeredUserResult);
             throw;
