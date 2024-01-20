@@ -40,7 +40,7 @@ public class AccountController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
     [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-    [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.InternalServerError)]
+    [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.InternalServerError)] //TODO: fazer testes
     public async Task<IActionResult> ConfirmEmailAsync([FromBody] ConfirmEmailRequestModel requestModel)
     {
         var registeredUserResult = await _userManager.FindByEmailAsync(requestModel.Email);

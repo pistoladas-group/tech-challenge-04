@@ -20,4 +20,9 @@ public sealed class User : IdentityUser<Guid>
     {
         IsDeleted = true;
     }
+    
+    public void ConfirmEmail()
+    {
+        EmailConfirmed = true;
+    }
 }

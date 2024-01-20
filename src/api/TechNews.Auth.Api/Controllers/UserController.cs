@@ -7,6 +7,7 @@ using TechNews.Auth.Api.Models;
 using TechNews.Common.Library.Models;
 using TechNews.Common.Library.MessageBus;
 using TechNews.Common.Library.Messages.Events;
+using TechNews.Common.Library.Services;
 
 namespace TechNews.Auth.Api.Controllers;
 
@@ -15,13 +16,13 @@ public class UserController : ControllerBase
 {
     private readonly IMessageBus _bus;
     private readonly UserManager<User> _userManager;
-    private readonly EventStoreClient _eventStoreClient;
+    private readonly IEventStoreService _eventStoreService;
 
-    public UserController(UserManager<User> userManager, IMessageBus bus, EventStoreClient eventStoreClient)
+    public UserController(UserManager<User> userManager, IMessageBus bus, IEventStoreService eventStoreService)
     {
         _bus = bus;
         _userManager = userManager;
-        _eventStoreClient = eventStoreClient;
+        _eventStoreService = eventStoreService;
     }
 
     /// <summary>
@@ -75,7 +76,7 @@ public class UserController : ControllerBase
 
         try
         {
-            await _eventStoreClient.AppendToStreamAsync(userRegisteredEvent.GetStreamName(), StreamState.Any, userRegisteredEvent.GetEventData());
+            await _eventStoreService.AppendToStreamAsync(userRegisteredEvent.GetStreamName(), StreamState.Any, userRegisteredEvent.GetEventData());
             _bus.Publish(userRegisteredEvent);
         }
         catch (Exception)

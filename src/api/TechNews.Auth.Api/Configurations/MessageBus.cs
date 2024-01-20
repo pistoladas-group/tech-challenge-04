@@ -7,7 +7,7 @@ public static class MessageBus
 {
     public static IServiceCollection ConfigureMessageBroker(this IServiceCollection services)
     {
-        services.AddSingleton<IMessageBus, RabbitMQMessageBus>(_ => 
+        services.AddSingleton<IMessageBus, RabbitMQMessageBus>(_ =>
             new RabbitMQMessageBus(
                 new RabbitMQMessageBusParameters(
                     HostName: EnvironmentVariables.BrokerHostName,
