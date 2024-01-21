@@ -46,21 +46,15 @@ public class AccountController : ControllerBase
         var registeredUserResult = await _userManager.FindByEmailAsync(requestModel.Email);
 
         if (registeredUserResult is null)
-        {
             return NotFound(new ApiResponse(error: new ErrorResponse("invalid_request", "UserNotFound", "The user was not found")));
-        }
 
-        if (requestModel.Token is null)
-        {
+        if (string.IsNullOrEmpty(requestModel.Token) || string.IsNullOrWhiteSpace(requestModel.Token))
             return BadRequest(new ApiResponse(error: new ErrorResponse("invalid_request", "TokenRequired", "The confirmation token is required")));
-        }
 
         var result = await _userManager.ConfirmEmailAsync(registeredUserResult, requestModel.Token);
 
         if (!result.Succeeded)
-        {
             return BadRequest(new ApiResponse(errors: result.Errors.ToList().ConvertAll(x => new ErrorResponse("invalid_request", x.Code, x.Description))));
-        }
 
         return Ok(new ApiResponse());
     }
@@ -85,35 +79,25 @@ public class AccountController : ControllerBase
         var registeredUserResult = await _userManager.FindByEmailAsync(user.Email);
 
         if (registeredUserResult?.UserName is null)
-        {
             return BadRequest(new ApiResponse(error: new ErrorResponse("invalid_request", "InvalidRequest", "User or password are invalid")));
-        }
 
         if (!registeredUserResult.EmailConfirmed)
-        {
             return StatusCode((int)HttpStatusCode.Forbidden, new ApiResponse(error: new ErrorResponse("unauthorized_client", "EmailNotConfirmed", "User email not confirmed")));
-        }
 
         var signInResult = await _signInManager.PasswordSignInAsync(registeredUserResult.UserName, user.Password, false, true);
 
         if (signInResult.IsLockedOut)
-        {
             return StatusCode((int)HttpStatusCode.Forbidden, new ApiResponse(error: new ErrorResponse("unauthorized_client", "LockedUser", "User temporary blocked for invalid attempts")));
-        }
 
         if (!signInResult.Succeeded)
-        {
             return BadRequest(new ApiResponse(error: new ErrorResponse("invalid_request", "InvalidRequest", "User or password are invalid")));
-        }
 
         var claims = await GetUserClaims(registeredUserResult);
 
         var token = await GetTokenAsync(claims, registeredUserResult);
 
         if (token is null)
-        {
             return StatusCode((int)HttpStatusCode.InternalServerError, new ApiResponse(error: new ErrorResponse("server_error", "InternalError", "There was an unexpected error with the application. Please contact support!")));
-        }
 
         return Ok(new ApiResponse(data: token));
     }
@@ -135,9 +119,7 @@ public class AccountController : ControllerBase
         var key = await _cryptographicKeyRetriever.GetExistingKeyAsync();
 
         if (key is null)
-        {
             return null;
-        }
 
         var tokenType = "at+jwt";
 
