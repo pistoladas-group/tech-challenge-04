@@ -228,6 +228,33 @@ Abaixo um diagrama que demonstra como o pipeline Main e UI Test se integram.
 
 As migrations do banco são realizadas por cada aplicação (Auth API e Core API), no momento em que a aplicação é executada no container. Isso garante que as bases estão atualizadas automaticamente através das migrations do Entity Framework. Também existe a opção de executar os scripts gerados manualmente. Eles se encontram na pasta "sql".
 
+# Mensageria
+
+Para a implementação de um Message Bus, escolhemos como Broker o RabbitMQ.
+
+O Produtor ao criar uma mensagem criará também uma Exchange com o nome do evento e uma fila de DeadLetter, se caso não existirem, para armazenar as mensagens.
+
+<p align="center">
+  <a href="">
+    <img src=".github\images\dead-letter.gif" alt="dead-letter">
+  </a>
+</p>
+
+O Consumidor ao ser executado irá: criar as filas, vincular (Bind) à Exchange do evento e desvincular a fila de DeadLetter. As mensagens armazenadas na fila de DeadLetter serão posteriormente reenviadas à Exchange para serem consumidas e processadas.
+
+<p align="center">
+  <a href="">
+    <img src=".github\images\unbind-deadletter.gif" alt="dead-letter">
+  </a>
+</p>
+
+Abaixo um exemplo de uma Exchange de "UserRegisteredEvent" redirecionando mensagens para as filas, que por sua vez, são nomeadas a partir de suas responsabilidades.
+
+<p align="center">
+  <a href="">
+    <img src=".github\images\exchanges-and-queues.gif" alt="exchanges-and-queues">
+  </a>
+</p>
 
 # Executando a aplicação
 É possível executar a aplicação realizando a configuração manualmente, ou utilizando Docker (recomendado).
